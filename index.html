@@ -9,52 +9,81 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC4QAkxEgTKroh9hBBZ92NsMtDHHXA5_Ds",
-  authDomain: "video-editor-reviews.firebaseapp.com",
-  databaseURL: "https://video-editor-reviews-default-rtdb.firebaseio.com",
-  projectId: "video-editor-reviews",
-  storageBucket: "video-editor-reviews.appspot.com",
-  messagingSenderId: "321617032971",
-  appId: "1:321617032971:web:ec6196170580233a36140e",
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4QAkxEgTKroh9hBBZ92NsMtDHHXA5_Ds",
+      authDomain: "video-editor-reviews.firebaseapp.com",
+      databaseURL: "https://video-editor-reviews-default-rtdb.firebaseio.com",
+      projectId: "video-editor-reviews",
+      storageBucket: "video-editor-reviews.appspot.com",
+      messagingSenderId: "321617032971",
+      appId: "1:321617032971:web:ec6196170580233a36140e",
+    };
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-const form = document.getElementById("review-form");
-const list = document.getElementById("review-list");
+    const form = document.getElementById("review-form");
+    const list = document.getElementById("review-list");
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const name = form.name.value;
-  const stars = form.stars.value;
-  const comment = form.comment.value;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = form.name.value;
+      const stars = form.stars.value;
+      const comment = form.comment.value;
 
-  push(ref(database, "reviews"), {
-    name,
-    stars,
-    comment
-  });
+      push(ref(database, "reviews"), { name, stars, comment });
+      form.reset();
+    });
 
-  form.reset();
-});
+    onValue(ref(database, "reviews"), (snapshot) => {
+      list.innerHTML = "";
+      const data = snapshot.val();
+      for (let id in data) {
+        const review = data[id];
+        const div = document.createElement("div");
+        div.innerHTML = `<h4>${review.name} - ${"★".repeat(review.stars)}</h4><p>${review.comment}</p>`;
+        list.appendChild(div);
+      }
+    });
+  </script>
+  <style>
+    /* --- مودال الفيديو --- */
+    .video-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      justify-content: center;
+      align-items: center;
+    }
 
-// عرض التقييمات
-onValue(ref(database, "reviews"), (snapshot) => {
-  list.innerHTML = "";
-  const data = snapshot.val();
-  for (let id in data) {
-    const review = data[id];
-    const div = document.createElement("div");
-    div.innerHTML = `<h4>${review.name} - ${"★".repeat(review.stars)}</h4><p>${review.comment}</p>`;
-    list.appendChild(div);
-  }
-});
-</script>
+    .video-content {
+      position: relative;
+      width: 90%;
+      max-width: 900px;
+    }
 
+    .video-content iframe {
+      width: 100%;
+      height: 500px;
+      border-radius: 12px;
+    }
+
+    #close-video {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      font-size: 30px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -73,11 +102,9 @@ onValue(ref(database, "reviews"), (snapshot) => {
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
-    <!-- داخل الـ <header> -->
-    <button id="dark-mode-toggle"
-      style="font-size: 1.4rem; background: none; border: none; cursor: pointer;">🌙</button>
-
+    <button id="dark-mode-toggle" style="font-size: 1.4rem; background: none; border: none; cursor: pointer;">🌙</button>
   </header>
+
   <section id="home" class="hero">
     <h2>Hello, I’m <span>Bahaeddine</span><br>Video Editor & Content Creator</h2>
     <p>I have solid experience with YouTube algorithm and TikTok strategy. I've collaborated with agencies,
@@ -91,17 +118,16 @@ onValue(ref(database, "reviews"), (snapshot) => {
   <section id="skills" class="skills">
     <h2 class="section-title">My Tools</h2>
     <div class="icons">
-      <img src="./adobe-premiere-pro-logo-png-and-vector-logo-download-adobe-premiere-pro-png-700_682.png"
-        alt="Premiere Pro">
+      <img src="./adobe-premiere-pro-logo-png.png" alt="Premiere Pro">
       <img src="./adob after effect.png" alt="After Effects">
       <img src="https://cdn.simpleicons.org/wondershare/6c63ff" alt="Filmora">
       <img src="https://cdn.simpleicons.org/davinciresolve/6c63ff" alt="DaVinci">
       <img src="https://cdn.simpleicons.org/bytedance/6c63ff" alt="CapCut">
     </div>
+
     <section class="review-section" id="review">
       <h2>Customer Reviews</h2>
       <div id="review-list"></div>
-
       <form id="review-form" class="review-form">
         <input type="text" name="name" placeholder="Your Name" required />
         <select name="stars" required>
@@ -115,191 +141,133 @@ onValue(ref(database, "reviews"), (snapshot) => {
         <button type="submit">Submit Review</button>
       </form>
     </section>
+  </section>
 
-    <section id="work" class="work">
-      <h2 class="section-title">My Work</h2>
-      <div class="projects">
-        <!-- Projects always visible -->
-        <div class="project-card">
-          <img src="https://via.placeholder.com/400x180.png?text=Spiritual+Story+Reel"
-            alt="Spiritual Storytelling Video">
-          <div class="content">
-            <h3>Before Earth: A Spiritual Storytelling Reel</h3>
-            <p>A poetic and emotional short video that imagines the human encounter with the Divine before descending to
-              Earth. Blending storytelling, cinematic visuals, and evocative sound design to deliver a powerful message.
-            </p>
-            <ul style="padding-left: 1.2rem; font-size: 0.95rem;">
-              <li>✔ Cinematic Color Grading</li>
-              <li>✔ Story-Driven Editing</li>
-              <li>✔ Emotional Sound Effects</li>
-              <li>✔ Deep Spiritual Message</li>
-            </ul>
-            <div class="project-buttons" style="margin-top: 10px;">
-              <a href="https://drive.google.com/file/d/1zof7n3Fw0X-_dr5FbGe86ZFzjjCKFu8m/view?usp=drive_link"
-                target="_blank" class="btn">🎬 Watch Reel</a>
-              <a href="#contact" class="btn secondary">📩 Collaborate on Similar Projects</a>
-            </div>
-          </div>
-        </div>
+  <section id="work" class="work">
+    <h2 class="section-title">My Work</h2>
+    <div class="projects">
 
-        <div class="project-card">
-          <img src="https://via.placeholder.com/400x180.png?text=YouTube+Storytelling+Video"
-            alt="First Encounter with God Video">
-          <div class="content">
-            <h3>seconde ep </h3>
-            <p>This YouTube storytelling video explores the powerful moment when the human soul met its Creator before
-              descending to Earth. With deep narration, custom animation, and emotional sound design, this episode
-              offers a reflective spiritual journey for viewers.</p>
-            <ul style="padding-left: 1.2rem; font-size: 0.95rem;">
-              <li>🎙️ Voice-over storytelling in Arabic with subtitles</li>
-              <li>🎞️ Cinematic animation and spiritual atmosphere</li>
-              <li>🎧 Sound effects and emotional background music</li>
-              <li>🎨 Professional color grading to match the theme</li>
-            </ul>
-            <div class="project-buttons" style="margin-top: 10px;">
-              <a href="https://drive.google.com/file/d/1SLkyqhNUAOeVVpYniP6RQKHeUcCVc4qD/view?usp=sharing"
-                target="_blank" class="btn">▶️ Watch on YouTube</a>
-              <a href="#contact" class="btn secondary">💼 Work With Me</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <img src="./أول بشري.png" alt="Prophet Idris Storytelling Video">
-          <div class="content">
-            <h3>The First Man to Die Beyond Earth</h3>
-            <p>A storytelling video about Prophet Idris (peace be upon him) featuring cinematic color grading,
-              animations, and immersive sound design to bring the story to life.</p>
-            <ul style="padding-left: 1.2rem; font-size: 0.95rem;">
-              <li>✔ Scriptwriting</li>
-              <li>✔ Motion Graphics & Animation</li>
-              <li>✔ Sound Effects</li>
-              <li>✔ Cinematic Color Grading</li>
-            </ul>
-            <div class="project-buttons" style="margin-top: 10px;">
-              <a href="https://drive.google.com/file/d/1ExIIL4bEoNuJmBx4Q369giopyrVrWIh-/view?usp=drive_link"
-                target="_blank" class="btn">🎬 Watch Now</a>
-              <a href="#contact" class="btn secondary">✉ Get a Similar Video</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Hidden Projects -->
-        <div class="project-card hidden">
-          <img src="https://via.placeholder.com/400x180.png?text=Product+Commercial" alt="Commercial Video">
-          <div class="content">
-            <h3>Product Commercial</h3>
-            <p>This commercial video focuses on showcasing the product in action with attention-grabbing motion
-              typography, vibrant visuals, and rhythmic editing — optimized for maximum impact on digital platforms.</p>
-            <div class="project-buttons" style="margin-top: 10px;">
-              <a href="https://drive.google.com/file/d/1lY1JvkzOnSiJ5pvwv_wh2b2iPj9tD1Km/view?usp=drive_link"
-                target="_blank" class="btn">▶️ Watch Now</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="project-card hidden">
-          <img src="https://via.placeholder.com/400x180.png?text=Video+Project+5" alt="Project 5">
-          <div class="content">
-            <h3>Project Title Five</h3>
-            <p>Event recap with dramatic cuts, slo-mo, and custom LUTs.</p>
-          </div>
-        </div>
-
-        <div class="project-card hidden">
-          <img src="https://via.placeholder.com/400x180.png?text=Video+Project+7" alt="Project 7">
-          <div class="content">
-            <h3>Project Title Seven</h3>
-            <p>Instagram reel styled for engagement and storytelling.</p>
+      <!-- Project 1 -->
+      <div class="project-card">
+        <img src="https://via.placeholder.com/400x180.png?text=Spiritual+Story+Reel" alt="Spiritual Storytelling Video">
+        <div class="content">
+          <h3>Before Earth: A Spiritual Storytelling Reel</h3>
+          <p>A poetic and emotional short video that imagines the human encounter with the Divine before descending to Earth. Blending storytelling, cinematic visuals, and evocative sound design to deliver a powerful message.</p>
+          <ul style="padding-left: 1.2rem; font-size: 0.95rem;">
+            <li>✔ Cinematic Color Grading</li>
+            <li>✔ Story-Driven Editing</li>
+            <li>✔ Emotional Sound Effects</li>
+            <li>✔ Deep Spiritual Message</li>
+          </ul>
+          <div class="project-buttons" style="margin-top: 10px;">
+            <button class="btn watch-btn" data-video="https://drive.google.com/file/d/1zof7n3Fw0X-_dr5FbGe86ZFzjjCKFu8m/preview">🎬 Watch Reel</button>
+            <a href="#contact" class="btn secondary">📩 Collaborate on Similar Projects</a>
           </div>
         </div>
       </div>
 
-      <!-- Buttons -->
-      <div class="view-all-container" style="text-align: center; margin-top: 20px;">
-        <button id="view-all-btn">View All</button>
-        <button id="show-less-btn" style="display: none;">Show Less</button>
+      <!-- Project 2 -->
+      <div class="project-card">
+        <img src="https://via.placeholder.com/400x180.png?text=YouTube+Storytelling+Video" alt="First Encounter with God Video">
+        <div class="content">
+          <h3>Second Episode</h3>
+          <p>This YouTube storytelling video explores the powerful moment when the human soul met its Creator before descending to Earth. With deep narration, custom animation, and emotional sound design, this episode offers a reflective spiritual journey for viewers.</p>
+          <ul style="padding-left: 1.2rem; font-size: 0.95rem;">
+            <li>🎙️ Voice-over storytelling in Arabic with subtitles</li>
+            <li>🎞️ Cinematic animation and spiritual atmosphere</li>
+            <li>🎧 Sound effects and emotional background music</li>
+            <li>🎨 Professional color grading to match the theme</li>
+          </ul>
+          <div class="project-buttons" style="margin-top: 10px;">
+            <button class="btn watch-btn" data-video="https://drive.google.com/file/d/1SLkyqhNUAOeVVpYniP6RQKHeUcCVc4qD/preview">▶️ Watch Now</button>
+            <a href="#contact" class="btn secondary">💼 Work With Me</a>
+          </div>
+        </div>
       </div>
-    </section>
 
-    <section id="contact" class="contact">
-      <h2 class="section-title">Contact Me</h2>
-     <form id="contact-form">
-  <input type="text" name="name" placeholder="Your Name" required>
-  <input type="email" name="email" placeholder="Your Email" required>
-  <textarea name="message" placeholder="Your Message" required></textarea>
-  <button type="submit">Send via WhatsApp</button>
-</form>
+    </div>
+  </section>
 
-    </section>
+  <section id="contact" class="contact">
+    <h2 class="section-title">Contact Me</h2>
+    <form id="contact-form">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <button type="submit">Send via WhatsApp</button>
+    </form>
+  </section>
 
-    <footer>
-      <p>&copy; 2025 bahaeddine the EagleX - Video Editor</p>
-    </footer>
+  <footer>
+    <p>&copy; 2025 Bahaeddine the EagleX - Video Editor</p>
+  </footer>
 
-    <script>
-      const viewAllBtn = document.getElementById('view-all-btn');
-      const showLessBtn = document.getElementById('show-less-btn');
-      const allProjects = document.querySelectorAll('.project-card');
-      const baseCount = 3;
-      viewAllBtn.addEventListener('click', () => {
-        for (let i = baseCount; i < allProjects.length; i++) {
-          allProjects[i].classList.remove('hidden');
-        }
-        viewAllBtn.style.display = 'none';
-        showLessBtn.style.display = 'inline-block';
+  <!-- فيديو مودال -->
+  <div id="video-modal" class="video-modal">
+    <div class="video-content">
+      <span id="close-video">&times;</span>
+      <iframe id="portfolio-video" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <script>
+    // مودال الفيديو
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById("video-modal");
+      const iframe = document.getElementById("portfolio-video");
+      const closeBtn = document.getElementById("close-video");
+
+      document.querySelectorAll(".watch-btn").forEach(button => {
+        button.addEventListener("click", function () {
+          const videoSrc = this.getAttribute("data-video");
+          iframe.src = videoSrc;
+          modal.style.display = "flex";
+        });
       });
-      showLessBtn.addEventListener('click', () => {
-        for (let i = baseCount; i < allProjects.length; i++) {
-          allProjects[i].classList.add('hidden');
-        }
-        showLessBtn.style.display = 'none';
-        viewAllBtn.style.display = 'inline-block';
+
+      closeBtn.addEventListener("click", function () {
+        modal.style.display = "none";
+        iframe.src = "";
       });
-    </script>
-<script>
-  const toggle = document.getElementById('dark-mode-toggle');
-  const body = document.body;
 
-  // حفظ الحالة في localStorage
-  if (localStorage.getItem('darkMode') === 'enabled') {
-    body.classList.add('dark-mode');
-    toggle.textContent = '☀️';
-  }
+      window.addEventListener("click", function (e) {
+        if (e.target === modal) {
+          modal.style.display = "none";
+          iframe.src = "";
+        }
+      });
+    });
 
-  toggle.addEventListener('click', () => {
-    body.classList.toggle('dark-mode');
+    // Dark Mode
+    const toggle = document.getElementById('dark-mode-toggle');
+    const body = document.body;
 
-    if (body.classList.contains('dark-mode')) {
-      localStorage.setItem('darkMode', 'enabled');
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
       toggle.textContent = '☀️';
-    } else {
-      localStorage.setItem('darkMode', 'disabled');
-      toggle.textContent = '🌙';
     }
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
+
+    toggle.addEventListener("click", () => {
+      body.classList.toggle('dark-mode');
+      if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+        toggle.textContent = '☀️';
+      } else {
+        localStorage.setItem('darkMode', 'disabled');
+        toggle.textContent = '🌙';
+      }
+    });
+
+    // WhatsApp Contact
     const contactForm = document.getElementById("contact-form");
-
-    if (!contactForm) return;
-
     contactForm.addEventListener("submit", function (e) {
       e.preventDefault();
-
       const name = contactForm.name.value.trim();
       const email = contactForm.email.value.trim();
       const message = contactForm.message.value.trim();
       const phoneNumber = "213674357338";
-      const submitButton = contactForm.querySelector("button[type='submit']");
 
-      if (!name || !email || !message) {
-        alert("Please fill in all fields before sending.");
-        return;
-      }
-
-      submitButton.textContent = "Sending...";
+      if (!name || !email || !message) { alert("Please fill all fields."); return; }
 
       const now = new Date();
       const date = now.toLocaleDateString();
@@ -307,39 +275,20 @@ onValue(ref(database, "reviews"), (snapshot) => {
 
       const fullMessage =
 `📥 *New Message from Portfolio Website*
-
 🕒 *Date:* ${date}
 ⏰ *Time:* ${time}
-
 👤 *Name:* ${name}
 📧 *Email:* ${email}
 📝 *Message:* 
 ${message}
-
 🔗 Sent via portfolio website`;
 
       const encodedMessage = encodeURIComponent(fullMessage);
       const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-
       window.open(whatsappURL, "_blank");
-
-      // Reset and confirm
-      submitButton.textContent = "Send via WhatsApp";
       contactForm.reset();
-
-      if (!document.getElementById("wa-confirm")) {
-        const confirmation = document.createElement("p");
-        confirmation.id = "wa-confirm";
-        confirmation.textContent = "✅ Your message was sent to WhatsApp!";
-        confirmation.style.color = "green";
-        confirmation.style.marginTop = "10px";
-        contactForm.appendChild(confirmation);
-      }
     });
-  });
-</script>
-
-    <script src="script.js"></script>
+  </script>
 </body>
 
 </html>
